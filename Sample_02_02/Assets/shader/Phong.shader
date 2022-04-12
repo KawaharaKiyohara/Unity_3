@@ -1,5 +1,5 @@
 Shader "Custom/Phong"
-{test
+{
     Properties
     {
         _MainTex ("Texture", 2D) = "white" {}
