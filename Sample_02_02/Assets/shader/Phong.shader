@@ -1,6 +1,5 @@
 Shader "Custom/Phong"
 {
-    SSHテスト
     Properties
     {
         _MainTex ("Texture", 2D) = "white" {}
