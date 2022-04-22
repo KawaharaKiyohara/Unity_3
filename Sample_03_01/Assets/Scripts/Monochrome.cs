@@ -2,18 +2,17 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Monochrome : MonoBehaviour
+public class Monochrome
 {
     // Start is called before the first frame update
-    [SerializeField]
+    
     Material m_material;
 
-    void Start()
+    public void Start()
     {
-        Camera camera = GetComponent<Camera>();
-        camera.depthTextureMode = DepthTextureMode.Depth;
+        m_material = new Material(Shader.Find("PostEffect/Monocrome"));
     }
-    private void OnRenderImage(RenderTexture source, RenderTexture destination)
+    public void OnRenderImage(RenderTexture source, RenderTexture destination)
     {
         Graphics.Blit(source, destination, m_material);
     }

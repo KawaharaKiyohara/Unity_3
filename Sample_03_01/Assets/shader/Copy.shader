@@ -1,4 +1,4 @@
-Shader "PostEffect/Monocrome"
+Shader "PostEffect/Copy"
 {
     Properties{
         _MainTex("Texture", 2D) = "white" {}
@@ -32,8 +32,6 @@ Shader "PostEffect/Monocrome"
             };
 
             sampler2D _MainTex;
-            sampler2D _CameraDepthTexture;
-
             float4 _MainTex_ST;
 
             v2f vert(appdata v)
@@ -47,9 +45,7 @@ Shader "PostEffect/Monocrome"
             fixed4 frag(v2f i) : SV_Target
             {
                 fixed4 c = tex2D(_MainTex, i.uv);
-                // convert to monocrome.
-                float t = c.r * 0.3 + c.g * 0.6 + c.b * 0.1;
-                return fixed4( t, t, t, 1.0) ;
+                return c;
             }
             ENDCG
         }
