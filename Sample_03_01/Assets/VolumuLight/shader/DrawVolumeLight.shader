@@ -16,8 +16,8 @@ Shader "VolumeLight/DrawVolume"
 
             sampler2D volumeFrontTexture;
             sampler2D volumeBackTexture;
-            float4x4 viewProjMatrixInv; // ƒrƒ…[ƒvƒƒWƒFƒNƒVƒ‡ƒ“•ÏŠ·‚Ì‹ts—ñB
-            float ramdomSeed;           // ƒ‰ƒ“ƒ_ƒ€ƒV[ƒhB
+            float4x4 viewProjMatrixInv; // ãƒ“ãƒ¥ãƒ¼ãƒ—ãƒ­ã‚¸ã‚§ã‚¯ã‚·ãƒ§ãƒ³å¤‰æ›ã®é€†è¡Œåˆ—ã€‚
+            float ramdomSeed;           // ãƒ©ãƒ³ãƒ€ãƒ ã‚·ãƒ¼ãƒ‰ã€‚
             struct appdata
             {
                 float4 vertex : POSITION;
@@ -26,26 +26,26 @@ Shader "VolumeLight/DrawVolume"
             struct v2f
             {
                 float4 vertex : SV_POSITION;
-                float4 posInProj : TEXCOORD0;   // Ë‰e‹óŠÔ‚ÌÀ•WB
+                float4 posInProj : TEXCOORD0;   // å°„å½±ç©ºé–“ã®åº§æ¨™ã€‚
             };
-            // ƒXƒ|ƒbƒgƒ‰ƒCƒg
+            // ã‚¹ãƒãƒƒãƒˆãƒ©ã‚¤ãƒˆ
             struct SpotLight
             {
-                float3 position;        // À•W
-                int isUse;              // g—p’†ƒtƒ‰ƒOB
-                float3 positionInView;  // ƒJƒƒ‰‹óŠÔ‚Å‚ÌÀ•WB
-                int no ;                // ƒ‰ƒCƒg‚Ì”Ô†B
-                float3 direction;       // Ëo•ûŒüB
-                float range;            // ‰e‹¿”ÍˆÍB
-                float3 color;           // ƒ‰ƒCƒg‚ÌƒJƒ‰[B
-                float3 color2;          // “ñ‚Â–Ú‚ÌƒJƒ‰[B
-                float3 color3;          // O‚Â–Ú‚ÌƒJƒ‰[B
-                float3 directionInView; // ƒJƒƒ‰‹óŠÔ‚Å‚ÌËo•ûŒüB
-                float3 rangePow;        // ‹——£‚É‚æ‚éŒõ‚Ì‰e‹¿—¦‚É—İæ‚·‚éƒpƒ‰ƒ[ƒ^[B1.0‚ÅüŒ`‚Ì•Ï‰»‚ğ‚·‚éB
-                                        // x‚ªˆê‚Â–Ú‚ÌƒJƒ‰[Ay‚ª“ñ‚Â–Ú‚ÌƒJƒ‰[Az‚ªO‚Â–Ú‚ÌƒJƒ‰[B
-                float3 angle;           // ËoŠp“x(’PˆÊFƒ‰ƒWƒAƒ“Bx‚ªˆê‚Â–Ú‚ÌƒJƒ‰[Ay‚ª“ñ‚Â–Ú‚ÌƒJƒ‰[Az‚ªO‚Â–Ú‚ÌƒJƒ‰[)B
-                float3 anglePow;        // ƒXƒ|ƒbƒgƒ‰ƒCƒg‚Æ‚ÌŠp“x‚É‚æ‚éŒõ‚Ì‰e‹¿—¦‚É—İæ‚·‚éƒpƒ‰ƒ[ƒ^B1.0‚ÅüŒ`‚É•Ï‰»‚·‚éB
-                                        // x‚ªˆê‚Â–Ú‚ÌƒJƒ‰[Ay‚ª“ñ‚Â–Ú‚ÌƒJƒ‰[Az‚ªO‚Â–Ú‚ÌƒJƒ‰[B
+                float3 position;        // åº§æ¨™
+                int isUse;              // ä½¿ç”¨ä¸­ãƒ•ãƒ©ã‚°ã€‚
+                float3 positionInView;  // ã‚«ãƒ¡ãƒ©ç©ºé–“ã§ã®åº§æ¨™ã€‚
+                int no ;                // ãƒ©ã‚¤ãƒˆã®ç•ªå·ã€‚
+                float3 direction;       // å°„å‡ºæ–¹å‘ã€‚
+                float range;            // å½±éŸ¿ç¯„å›²ã€‚
+                float3 color;           // ãƒ©ã‚¤ãƒˆã®ã‚«ãƒ©ãƒ¼ã€‚
+                float3 color2;          // äºŒã¤ç›®ã®ã‚«ãƒ©ãƒ¼ã€‚
+                float3 color3;          // ä¸‰ã¤ç›®ã®ã‚«ãƒ©ãƒ¼ã€‚
+                float3 directionInView; // ã‚«ãƒ¡ãƒ©ç©ºé–“ã§ã®å°„å‡ºæ–¹å‘ã€‚
+                float3 rangePow;        // è·é›¢ã«ã‚ˆã‚‹å…‰ã®å½±éŸ¿ç‡ã«ç´¯ä¹—ã™ã‚‹ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ãƒ¼ã€‚1.0ã§ç·šå½¢ã®å¤‰åŒ–ã‚’ã™ã‚‹ã€‚
+                                        // xãŒä¸€ã¤ç›®ã®ã‚«ãƒ©ãƒ¼ã€yãŒäºŒã¤ç›®ã®ã‚«ãƒ©ãƒ¼ã€zãŒä¸‰ã¤ç›®ã®ã‚«ãƒ©ãƒ¼ã€‚
+                float3 angle;           // å°„å‡ºè§’åº¦(å˜ä½ï¼šãƒ©ã‚¸ã‚¢ãƒ³ã€‚xãŒä¸€ã¤ç›®ã®ã‚«ãƒ©ãƒ¼ã€yãŒäºŒã¤ç›®ã®ã‚«ãƒ©ãƒ¼ã€zãŒä¸‰ã¤ç›®ã®ã‚«ãƒ©ãƒ¼)ã€‚
+                float3 anglePow;        // ã‚¹ãƒãƒƒãƒˆãƒ©ã‚¤ãƒˆã¨ã®è§’åº¦ã«ã‚ˆã‚‹å…‰ã®å½±éŸ¿ç‡ã«ç´¯ä¹—ã™ã‚‹ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ã€‚1.0ã§ç·šå½¢ã«å¤‰åŒ–ã™ã‚‹ã€‚
+                                        // xãŒä¸€ã¤ç›®ã®ã‚«ãƒ©ãƒ¼ã€yãŒäºŒã¤ç›®ã®ã‚«ãƒ©ãƒ¼ã€zãŒä¸‰ã¤ç›®ã®ã‚«ãƒ©ãƒ¼ã€‚
             };
                         
             v2f vert (appdata v)
@@ -59,10 +59,10 @@ Shader "VolumeLight/DrawVolume"
                 return o;
             }
             /*!
-             * @brief	UVÀ•W‚Æ[“x’l‚©‚çƒ[ƒ‹ƒhÀ•W‚ğŒvZ‚·‚éB
-             * @param[in]	uv				uvÀ•W
-             * @param[in]	zInScreen		ƒXƒNƒŠ[ƒ“À•WŒn‚Ì[“x’l
-             * @param[in]	mViewProjInv	ƒrƒ…[ƒvƒƒWƒFƒNƒVƒ‡ƒ“s—ñ‚Ì‹ts—ñB
+             * @brief	UVåº§æ¨™ã¨æ·±åº¦å€¤ã‹ã‚‰ãƒ¯ãƒ¼ãƒ«ãƒ‰åº§æ¨™ã‚’è¨ˆç®—ã™ã‚‹ã€‚
+             * @param[in]	uv				uvåº§æ¨™
+             * @param[in]	zInScreen		ã‚¹ã‚¯ãƒªãƒ¼ãƒ³åº§æ¨™ç³»ã®æ·±åº¦å€¤
+             * @param[in]	mViewProjInv	ãƒ“ãƒ¥ãƒ¼ãƒ—ãƒ­ã‚¸ã‚§ã‚¯ã‚·ãƒ§ãƒ³è¡Œåˆ—ã®é€†è¡Œåˆ—ã€‚
              */
             float3 CalcWorldPosFromUVZ(float2 uv, float zInScreen, float4x4 mViewProjInv)
             {
@@ -91,20 +91,20 @@ Shader "VolumeLight/DrawVolume"
                 float3 volumePosBack = CalcWorldPosFromUVZ(uv, volumeBackZ, viewProjMatrixInv);
                 float3 volumePosFront = CalcWorldPosFromUVZ(uv, volumeFrontZ, viewProjMatrixInv);
 
-                // todo ƒXƒ|ƒbƒgƒ‰ƒCƒg‚Ì•ûŒü‚Í‰¼BŒã‚ÅƒeƒNƒXƒ`ƒƒ‚É‘‚«o‚·Bfloat t0 = dot(spotLight.direction, volumePosFront - spotLight.position);
-                // todo ƒXƒ|ƒbƒgƒ‰ƒCƒg‚Ì•ûŒü‚Í‰¼BŒã‚ÅƒeƒNƒXƒ`ƒƒ‚É‘‚«o‚·Bfloat t1 = dot(spotLight.direction, volumePosBack - spotLight.position);
+                // todo ã‚¹ãƒãƒƒãƒˆãƒ©ã‚¤ãƒˆã®æ–¹å‘ã¯ä»®ã€‚å¾Œã§ãƒ†ã‚¯ã‚¹ãƒãƒ£ã«æ›¸ãå‡ºã™ã€‚float t0 = dot(spotLight.direction, volumePosFront - spotLight.position);
+                // todo ã‚¹ãƒãƒƒãƒˆãƒ©ã‚¤ãƒˆã®æ–¹å‘ã¯ä»®ã€‚å¾Œã§ãƒ†ã‚¯ã‚¹ãƒãƒ£ã«æ›¸ãå‡ºã™ã€‚float t1 = dot(spotLight.direction, volumePosBack - spotLight.position);
                 float t0 = dot(float3( 0.0f, 1.0f, 0.0f ), volumePosFront);
                 float t1 = dot(float3(0.0f, 1.0f, 0.0f), volumePosBack );
                 float t = t0 / (t0 + t1);
                 float3 volumeCenterPos = lerp(volumePosFront, volumePosBack, t);
                 float volume = length(volumePosBack - volumePosFront);
 
-                // ƒ{ƒŠƒ…[ƒ€‚ª‚È‚¢‰ÓŠ‚ÍƒsƒNƒZƒ‹ƒLƒ‹B
+                // ãƒœãƒªãƒ¥ãƒ¼ãƒ ãŒãªã„ç®‡æ‰€ã¯ãƒ”ã‚¯ã‚»ãƒ«ã‚­ãƒ«ã€‚
                 clip(volume - 0.001f);
 
                 // float4 albedoColor = albedoTexture.Sample(Sampler, uv);
                 float4 albedoColor = float4( 0.5f, 0.5f, 0.5f, 1.0f);
-                // todo ‚±‚ê‚ç‚Í‚·‚×‚Äƒf[ƒ^‚©‚çˆø‚Á’£‚Á‚Ä‚­‚é‚æ‚¤‚É‚·‚éB
+                // todo ã“ã‚Œã‚‰ã¯ã™ã¹ã¦ãƒ‡ãƒ¼ã‚¿ã‹ã‚‰å¼•ã£å¼µã£ã¦ãã‚‹ã‚ˆã†ã«ã™ã‚‹ã€‚
                 SpotLight spotLight;
                 spotLight.position = float3(0.0f, 0.0f, 0.0f);
                 spotLight.angle = float3( 0.6f, 0.2f, 0.3f );
@@ -116,36 +116,36 @@ Shader "VolumeLight/DrawVolume"
                 spotLight.color2 = float3( 50.0f, 50.0f, 0.0f);
                 spotLight.color3 = float3( 200.0f, 200.0f, 200.0f);
 
-                // ‹——£‚É‚æ‚éŒõ‚Ì‰e‹¿—¦‚ğŒvZB
+                // è·é›¢ã«ã‚ˆã‚‹å…‰ã®å½±éŸ¿ç‡ã‚’è¨ˆç®—ã€‚
                 float3 ligDir = (volumeCenterPos - spotLight.position);
                 float distance = length(ligDir);
                 ligDir = normalize(ligDir);
                 float3 affectBase = 1.0f - min(1.0f, distance / spotLight.range);
                 float3 affect = pow( affectBase, spotLight.rangePow);     
 
-                // ‘±‚¢‚ÄŠp“x‚É‚æ‚éŒ¸Š‚ğŒvZ‚·‚éB
-                // Šp“x‚É”ä—á‚µ‚Ä¬‚³‚­‚È‚Á‚Ä‚¢‚­‰e‹¿—¦‚ğŒvZ‚·‚é
+                // ç¶šã„ã¦è§’åº¦ã«ã‚ˆã‚‹æ¸›è¡°ã‚’è¨ˆç®—ã™ã‚‹ã€‚
+                // è§’åº¦ã«æ¯”ä¾‹ã—ã¦å°ã•ããªã£ã¦ã„ãå½±éŸ¿ç‡ã‚’è¨ˆç®—ã™ã‚‹
                 float angleLigToPixel = saturate(dot(ligDir, spotLight.direction) );
                 
-                // dot()‚Å‹‚ß‚½’l‚ğacos()‚É“n‚µ‚ÄŠp“x‚ğ‹‚ß‚é
+                // dot()ã§æ±‚ã‚ãŸå€¤ã‚’acos()ã«æ¸¡ã—ã¦è§’åº¦ã‚’æ±‚ã‚ã‚‹
                 angleLigToPixel = abs(acos(angleLigToPixel)) ;
                 
-                // Œõ‚ÌŠp“x‚É‚æ‚éŒ¸Š‚ğŒvZB
+                // å…‰ã®è§’åº¦ã«ã‚ˆã‚‹æ¸›è¡°ã‚’è¨ˆç®—ã€‚
                 float3 angleAffectBase = max( 0.0f, 1.0f - 1.0f / spotLight.angle * angleLigToPixel );
                 angleAffectBase = min( 1.0f, angleAffectBase * 1.8f);
                 float3 angleAffect = pow( angleAffectBase, spotLight.anglePow );    
                 affect *= angleAffect;
 
                 float3 lig = 0;
-                // O‚Â‚ÌŒõ‚ğ‡¬B    
-                // Œõ‚Ìƒx[ƒX‚ğŒvZB
+                // ä¸‰ã¤ã®å…‰ã‚’åˆæˆã€‚    
+                // å…‰ã®ãƒ™ãƒ¼ã‚¹ã‚’è¨ˆç®—ã€‚
                 float3 ligBase = albedoColor * step( volumeFrontZ, albedoColor.w ) * max( 0.0f, log(volume) ) * 0.1f;
-                // Œõ‚Ìƒx[ƒX‚É‰e‹¿—¦‚ğæZ‚·‚éB
+                // å…‰ã®ãƒ™ãƒ¼ã‚¹ã«å½±éŸ¿ç‡ã‚’ä¹—ç®—ã™ã‚‹ã€‚
                 lig = ligBase * affect.x * spotLight.color; 
                 lig += ligBase * affect.y * spotLight.color2;
                 lig += ligBase * affect.z * spotLight.color3;
                 
-                // ‹ó‹C’†‚Ìƒ`ƒŠ‚Ì•\Œ»‚Æ‚µ‚ÄƒmƒCƒY‚ğ‰Á‚¦‚éB
+                // ç©ºæ°—ä¸­ã®ãƒãƒªã®è¡¨ç¾ã¨ã—ã¦ãƒã‚¤ã‚ºã‚’åŠ ãˆã‚‹ã€‚
                 lig *= lerp( 0.9f, 1.1f, GetRandomNumber(uv, ramdomSeed));
                 // lig *= lerp( 0.9f, 1.1f, 0.0f);
 

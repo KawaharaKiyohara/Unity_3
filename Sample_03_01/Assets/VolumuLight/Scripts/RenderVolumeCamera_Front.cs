@@ -22,7 +22,7 @@ public class RenderVolumeCamera_Front : MonoBehaviour
     {
         if (m_width != Screen.width || m_height != Screen.height)
         {
-            // ‰æ–Ê‰ğ‘œ“x‚ª•Ï‚í‚Á‚½‚Ì‚Åì‚è’¼‚µB
+            // ç”»é¢è§£åƒåº¦ãŒå¤‰ã‚ã£ãŸã®ã§ä½œã‚Šç›´ã—ã€‚
             m_width = Screen.width;
             m_height = Screen.height;
             depthTexture = new RenderTexture(m_width, m_height, 32, RenderTextureFormat.RFloat);
