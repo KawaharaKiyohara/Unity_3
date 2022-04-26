@@ -34,9 +34,9 @@ TagManager:
   - 
   - 
   - 
-  - VolumeRender_FInal
-  - VolumeRender_Front
-  - VolumeRender_Back
+  - VolumeLightRender_FInal
+  - VolumeMapRender_Front
+  - VolumeMapRender_Back
   m_SortingLayers:
   - name: Default
     uniqueID: 0

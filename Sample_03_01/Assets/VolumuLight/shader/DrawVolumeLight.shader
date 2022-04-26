@@ -36,7 +36,7 @@ Shader "VolumeLight/DrawVolume"
                 float3 positionInView;  // カメラ空間での座標。
                 int no ;                // ライトの番号。
                 float3 direction;       // 射出方向。
-                float range;            // 影響範囲。
+                float3 range;           // 影響範囲。
                 float3 color;           // ライトのカラー。
                 float3 color2;          // 二つ目のカラー。
                 float3 color3;          // 三つ目のカラー。
@@ -47,7 +47,9 @@ Shader "VolumeLight/DrawVolume"
                 float3 anglePow;        // スポットライトとの角度による光の影響率に累乗するパラメータ。1.0で線形に変化する。
                                         // xが一つ目のカラー、yが二つ目のカラー、zが三つ目のカラー。
             };
-                        
+
+            StructuredBuffer< SpotLight> volumeSpotLightArray;
+            
             v2f vert (appdata v)
             {
                 v2f o;
@@ -85,36 +87,26 @@ Shader "VolumeLight/DrawVolume"
                 uv += 0.5f;
                 
                 // 
-                float volumeFrontZ = tex2D(volumeFrontTexture, uv).r;
-                float volumeBackZ = tex2D(volumeBackTexture, uv).r;
+                float2 volumeFrontZ_ID = tex2D(volumeFrontTexture, uv).rg;
+                float2 volumeBackZ_ID = tex2D(volumeBackTexture, uv).rg;
                 
-                float3 volumePosBack = CalcWorldPosFromUVZ(uv, volumeBackZ, viewProjMatrixInv);
-                float3 volumePosFront = CalcWorldPosFromUVZ(uv, volumeFrontZ, viewProjMatrixInv);
+                float3 volumePosBack = CalcWorldPosFromUVZ(uv, volumeBackZ_ID.r, viewProjMatrixInv);
+                float3 volumePosFront = CalcWorldPosFromUVZ(uv, volumeFrontZ_ID.r, viewProjMatrixInv);
 
-                // todo スポットライトの方向は仮。後でテクスチャに書き出す。float t0 = dot(spotLight.direction, volumePosFront - spotLight.position);
-                // todo スポットライトの方向は仮。後でテクスチャに書き出す。float t1 = dot(spotLight.direction, volumePosBack - spotLight.position);
-                float t0 = dot(float3( 0.0f, 1.0f, 0.0f ), volumePosFront);
-                float t1 = dot(float3(0.0f, 1.0f, 0.0f), volumePosBack );
+                int spotLightID = (int)volumeFrontZ_ID.g;
+                SpotLight spotLight = volumeSpotLightArray[spotLightID];
+                float t0 = dot(spotLight.direction, volumePosFront - spotLight.position);
+                float t1 = dot(spotLight.direction, volumePosBack - spotLight.position);
+                
                 float t = t0 / (t0 + t1);
                 float3 volumeCenterPos = lerp(volumePosFront, volumePosBack, t);
                 float volume = length(volumePosBack - volumePosFront);
 
                 // ボリュームがない箇所はピクセルキル。
                 clip(volume - 0.001f);
-
+                
                 // float4 albedoColor = albedoTexture.Sample(Sampler, uv);
                 float4 albedoColor = float4( 0.5f, 0.5f, 0.5f, 1.0f);
-                // todo これらはすべてデータから引っ張ってくるようにする。
-                SpotLight spotLight;
-                spotLight.position = float3(0.0f, 0.0f, 0.0f);
-                spotLight.angle = float3( 0.6f, 0.2f, 0.3f );
-                spotLight.anglePow = float3(1.5f, 2.0f, 1.0f );
-                spotLight.range = float3( 200.0f, 100.0f, 100.0f );
-                spotLight.rangePow = float3(1.0f, 2.0f, 10.0f );
-                spotLight.direction = float3( 0.0f, 1.0f, 0.0f);
-                spotLight.color = float3( 10.0f, 0.0f, 0.0f);
-                spotLight.color2 = float3( 50.0f, 50.0f, 0.0f);
-                spotLight.color3 = float3( 200.0f, 200.0f, 200.0f);
 
                 // 距離による光の影響率を計算。
                 float3 ligDir = (volumeCenterPos - spotLight.position);
@@ -139,7 +131,7 @@ Shader "VolumeLight/DrawVolume"
                 float3 lig = 0;
                 // 三つの光を合成。    
                 // 光のベースを計算。
-                float3 ligBase = albedoColor * step( volumeFrontZ, albedoColor.w ) * max( 0.0f, log(volume) ) * 0.1f;
+                float3 ligBase = albedoColor * step( volumeFrontZ_ID.r, albedoColor.w ) * max( 0.0f, log(volume) ) * 0.1f;
                 // 光のベースに影響率を乗算する。
                 lig = ligBase * affect.x * spotLight.color; 
                 lig += ligBase * affect.y * spotLight.color2;
