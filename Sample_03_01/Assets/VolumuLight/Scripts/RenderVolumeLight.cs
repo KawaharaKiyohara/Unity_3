@@ -26,6 +26,7 @@ namespace VolumeLight {
         void Start()
         {
             m_camera = GetComponent<Camera>();
+            m_camera.depthTextureMode = DepthTextureMode.Depth;
             m_commandBuffer = new CommandBuffer();
             m_volumeSpotLights = Object.FindObjectsOfType<VolumeSpotLight>();
             m_drawBackMaterialList = new List<Material>();
@@ -77,7 +78,8 @@ namespace VolumeLight {
                 );
                 // 背面を描画。
                 m_commandBuffer.SetRenderTarget(m_volumeMapBack);
-                m_commandBuffer.ClearRenderTarget(true, true, Color.black);
+                // todo プラットフォームによってはクリアする値を変更する必要があるかも。
+                m_commandBuffer.ClearRenderTarget(true, true, Color.white);
                 m_commandBuffer.DrawMesh(
                     m_drawBackMeshFilterList[litNo].mesh,
                     mWorld,
@@ -86,7 +88,8 @@ namespace VolumeLight {
 
                 // 表面を描画。
                 m_commandBuffer.SetRenderTarget(m_volumeMapFront);
-                m_commandBuffer.ClearRenderTarget(true, true, Color.black);
+                // todo プラットフォームによってはクリアする値を変更する必要があるかも。
+                m_commandBuffer.ClearRenderTarget(true, true, Color.white);
                 m_commandBuffer.DrawMesh(
                     m_drawFrontMeshFilterList[litNo].mesh,
                     mWorld,
