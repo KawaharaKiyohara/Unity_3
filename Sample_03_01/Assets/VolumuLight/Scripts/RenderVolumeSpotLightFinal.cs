@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 namespace VolumeLight
 {
@@ -26,9 +27,9 @@ namespace VolumeLight
         public Vector3 anglePow;           // スポットライトとの角度による光の影響率に累乗するパラメータ。1.0で線形に変化する。
                                            // xが一つ目のカラー、yが二つ目のカラー、zが三つ目のカラー。
     };
-    public class CameraForRenderVolumeSpotLightFinal : MonoBehaviour
+    public class RenderVolumeSpotLightFinal : MonoBehaviour
     {
-        public static CameraForRenderVolumeSpotLightFinal instance { get; private set; }
+        
         /// <summary>
         /// シェーダープロパティIDをまとめた構造体
         /// </summary>
@@ -43,58 +44,58 @@ namespace VolumeLight
 
 
         const int MAX_VOLUME_SPOT_LIGHT = 1000; // ボリュームスポとライトの最大数。
+        
+        MeshFilter m_meshFilter;                 // メッシュフィルター。
         Material m_material;                    // マテリアル。
-        Camera VolumeMapRenderCamera_front;     // ボリュームマップ(前面深度値)を描画するためのカメラ
-        Camera VolumeMapRenderCamera_back;      // ボリュームマップ(背面深度値)を描画するためのカメラ。
+        
         ShaderPropertyToID m_shaderPropToId = new ShaderPropertyToID();
-        VolumeSpotLightData[] m_volumeSpotLightDataArray = new VolumeSpotLightData[MAX_VOLUME_SPOT_LIGHT];
+        VolumeSpotLightData[] m_volumeSpotLightDataArray = new VolumeSpotLightData[1];
         GraphicsBuffer m_volumeSpotLightDataGraphicsBuffer;
-
-        private void Awake()
-        {
-            instance = this;
-        }
+        
+        
         void Start()
         {
             m_volumeSpotLightDataGraphicsBuffer = new GraphicsBuffer(
                 GraphicsBuffer.Target.Structured,
-                MAX_VOLUME_SPOT_LIGHT,
+                1,
                 Marshal.SizeOf(typeof(VolumeSpotLightData))
             );
-            var mainCamera = GameObject.Find("Main Camera").GetComponent<Camera>(); ;
-            mainCamera.depthTextureMode = DepthTextureMode.Depth;
-            m_material = GetComponent<MeshRenderer>().material;
-            VolumeMapRenderCamera_front = GameObject.Find("VolumeMapRenderCamera_front").GetComponent<Camera>(); ;
-            VolumeMapRenderCamera_back = GameObject.Find("VolumeMapRenderCamera_back").GetComponent<Camera>();
+            var meshRenderer = GetComponent<MeshRenderer>();
+            meshRenderer.enabled = false;
+            m_meshFilter = GetComponent<MeshFilter>();
+            m_material = meshRenderer.material;
+            
             m_shaderPropToId.volumeFrontTexID = Shader.PropertyToID("volumeFrontTexture");
             m_shaderPropToId.volumeBackTexID = Shader.PropertyToID("volumeBackTexture");
             m_shaderPropToId.viewProjectionMatrixInvID = Shader.PropertyToID("viewProjMatrixInv");
             m_shaderPropToId.randomSeedID = Shader.PropertyToID("ramdomSeed");
             m_shaderPropToId.volumeSpotLightArrayID = Shader.PropertyToID("volumeSpotLightArray");
-        }
-        public void RegisterVolumeSpotLightData(VolumeSpotLightData data)
-        {
-            m_volumeSpotLightDataArray[data.no] = data;
-        }
-        // Update is called once per frame
-        void Update()
-        {
 
+            
         }
-        private void LateUpdate()
+        
+        public void Draw(Camera camera, RenderTexture volumeMapFront, RenderTexture VolumeMapBack, CommandBuffer commandBuffer, VolumeSpotLightData data)
         {
-
-            var projMatrix = GL.GetGPUProjectionMatrix(VolumeMapRenderCamera_front.projectionMatrix, true);
-            Matrix4x4 mViewProjMatInv = projMatrix * VolumeMapRenderCamera_front.worldToCameraMatrix;
+            m_volumeSpotLightDataArray[0] = data;
+            var projMatrix = GL.GetGPUProjectionMatrix(camera.projectionMatrix, true);
+            Matrix4x4 mViewProjMatInv = projMatrix * camera.worldToCameraMatrix;
             mViewProjMatInv = Matrix4x4.Inverse(mViewProjMatInv);
-            m_material.SetTexture(m_shaderPropToId.volumeFrontTexID, VolumeMapRenderCamera_front.targetTexture);
-            m_material.SetTexture(m_shaderPropToId.volumeBackTexID, VolumeMapRenderCamera_back.targetTexture);
+            Matrix4x4 m = Matrix4x4.TRS(Vector3.zero, Quaternion.identity, transform.lossyScale);
+
+            m_material.SetTexture(m_shaderPropToId.volumeFrontTexID, volumeMapFront);
+            m_material.SetTexture(m_shaderPropToId.volumeBackTexID, VolumeMapBack);
             m_material.SetMatrix(m_shaderPropToId.viewProjectionMatrixInvID, mViewProjMatInv);
             m_material.SetFloat(m_shaderPropToId.randomSeedID, Random.Range(0.0f, 1.0f));
-
+            
             m_volumeSpotLightDataGraphicsBuffer.SetData(m_volumeSpotLightDataArray);
 
             m_material.SetBuffer(m_shaderPropToId.volumeSpotLightArrayID, m_volumeSpotLightDataGraphicsBuffer);
+
+            commandBuffer.DrawMesh(
+                 m_meshFilter.mesh,
+                 m,
+                 m_material
+             );
         }
     }
 }

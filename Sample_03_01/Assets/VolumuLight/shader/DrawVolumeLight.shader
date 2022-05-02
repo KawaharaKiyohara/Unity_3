@@ -8,6 +8,9 @@ Shader "VolumeLight/DrawVolume"
         Pass
         {
             Blend OneMinusDstColor One
+            Cull Off
+            ZWrite Off
+            ZTest Always
             CGPROGRAM
             #pragma vertex vert
             #pragma fragment frag
@@ -18,6 +21,7 @@ Shader "VolumeLight/DrawVolume"
             sampler2D volumeBackTexture;
             float4x4 viewProjMatrixInv; // ビュープロジェクション変換の逆行列。
             float ramdomSeed;           // ランダムシード。
+            int spotLightNo;
             struct appdata
             {
                 float4 vertex : POSITION;
@@ -53,10 +57,7 @@ Shader "VolumeLight/DrawVolume"
             v2f vert (appdata v)
             {
                 v2f o;
-                o.vertex = v.vertex ;
-                
-                o.vertex.z = 1.0f;
-                o.vertex.w = 1.0f;
+                o.vertex = UnityObjectToClipPos(v.vertex);
                 o.posInProj = o.vertex;
                 return o;
             }
@@ -82,7 +83,8 @@ Shader "VolumeLight/DrawVolume"
             }
             fixed4 frag(v2f i) : SV_Target
             {
-                float2 uv = i.posInProj.xy;
+                
+                float2 uv = i.posInProj.xy / i.posInProj.w;
                 uv *= float2(0.5f, -0.5f);
                 uv += 0.5f;
                 
@@ -93,8 +95,7 @@ Shader "VolumeLight/DrawVolume"
                 float3 volumePosBack = CalcWorldPosFromUVZ(uv, volumeBackZ_ID.r, viewProjMatrixInv);
                 float3 volumePosFront = CalcWorldPosFromUVZ(uv, volumeFrontZ_ID.r, viewProjMatrixInv);
 
-                int spotLightID = (int)volumeFrontZ_ID.g;
-                SpotLight spotLight = volumeSpotLightArray[spotLightID];
+                SpotLight spotLight = volumeSpotLightArray[spotLightNo];
                 float t0 = dot(spotLight.direction, volumePosFront - spotLight.position);
                 float t1 = dot(spotLight.direction, volumePosBack - spotLight.position);
                 
@@ -103,6 +104,7 @@ Shader "VolumeLight/DrawVolume"
                 float volume = length(volumePosBack - volumePosFront);
 
                 // ボリュームがない箇所はピクセルキル。
+                
                 clip(volume - 0.001f);
                 
                 // float4 albedoColor = albedoTexture.Sample(Sampler, uv);

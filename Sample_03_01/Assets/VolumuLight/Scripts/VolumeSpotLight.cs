@@ -7,6 +7,7 @@ namespace VolumeLight
     public class VolumeSpotLight : MonoBehaviour
     {
         VolumeSpotLightData m_data = new VolumeSpotLightData(); // ボリュームスポットライトデータ。
+        public VolumeSpotLightData volumeSpotLightData { get { return m_data; } } 
         public int id { private get; set; }     // ボリュームライトのID
         Material[] m_materialRenderVolumeMap;   // ボリュームマップを描画するマテリアル。
         int m_shaderPropertyId_volumeLightID;   // ボリュームライトIDのシェーダーID
@@ -59,11 +60,11 @@ namespace VolumeLight
         void Update()
         {
             // IDを割り当てる。
-            AssignIDToVolueLight.instance.AssignIDToVolumeLight(this);
-            foreach (var material in m_materialRenderVolumeMap)
-            {
-                material.SetInt(m_shaderPropertyId_volumeLightID, id);
-            }
+            //AssignIDToVolueLight.instance.AssignIDToVolumeLight(this);
+            //foreach (var material in m_materialRenderVolumeMap)
+            //{
+            //    material.SetInt(m_shaderPropertyId_volumeLightID, id);
+            //}
 
             m_data.no = id;
             m_data.position = transform.position;
@@ -96,15 +97,15 @@ namespace VolumeLight
             m_data.rangePow.y = rangePow2;
             m_data.rangePow.z = rangePow3;
 
-            float maxRange = range1;
-            float maxAngle = m_data.angle.x ;
+            float maxRange = Mathf.Max( range1, range2, range3 );
+            float maxAngle = Mathf.Max( m_data.angle.x, m_data.angle.y, m_data.angle.z ) ;
             Vector3 scale;
             float xyScale = Mathf.Tan(Mathf.Min(Mathf.PI * 0.49f, maxAngle)) * maxRange;
             scale.x = xyScale;
             scale.y = xyScale;
             scale.z = maxRange;
             transform.localScale = scale;
-            CameraForRenderVolumeSpotLightFinal.instance.RegisterVolumeSpotLightData(m_data);
+          //  CameraForRenderVolumeSpotLightFinal.instance.RegisterVolumeSpotLightData(m_data);
         }
     }
 }
