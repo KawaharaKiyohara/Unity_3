@@ -4,106 +4,110 @@ using UnityEngine;
 using UnityEngine.Rendering;
 
 namespace VolumeLight {
+    /// <summary>
+    /// ãƒœãƒªãƒ¥ãƒ¼ãƒ ãƒ©ã‚¤ãƒˆæç”»å‡¦ç†ã€‚
+    /// </summary>
     public class RenderVolumeLight : MonoBehaviour
     {
-        CommandBuffer m_commandBuffer;
-        Camera m_camera;
-        VolumeSpotLight[] m_volumeSpotLights;           // ƒ{ƒŠƒ…[ƒ€ƒXƒ|ƒbƒgƒ‰ƒCƒgB
-        RenderTexture m_volumeMapBack;                  // ”w–Ê‚Ì[“x’l‚ª‘‚«‚Ü‚ê‚Ä‚¢‚éƒ{ƒŠƒ…[ƒ€ƒ}ƒbƒvB
-        RenderTexture m_volumeMapFront;                 // •\–Ê‚Ì[“x’l‚ª‘‚«‚Ü‚ê‚Ä‚¢‚éƒ{ƒŠƒ…[ƒ€ƒ}ƒbƒvB
-        int m_width;                                    // ƒ{ƒŠƒ…[ƒ€ƒ}ƒbƒv‚Ì•B
-        int m_height;                                   // ƒ{ƒŠƒ…[ƒ€ƒ}ƒbƒv‚Ì‚‚³B
-        List<MeshRenderer> m_drawBackGameObjects;       // ”w–Ê‚ğ•`‰æ‚·‚éƒQ[ƒ€ƒIƒuƒWƒFƒNƒg‚ÌƒŠƒXƒgB
-        List<MeshRenderer> m_drawFrontGameObjects;      // •\–Ê‚ğ•`‰æ‚·‚éƒQ[ƒ€ƒIƒuƒWƒFƒNƒg‚ÌƒŠƒXƒgB
-        List<MeshFilter> m_drawBackMeshFilter;          // ”w–Ê‚ğ•`‰æ‚·‚éƒQ[ƒ€ƒIƒuƒWƒFƒNƒg‚ÌƒŠƒXƒgB
-        List<MeshFilter> m_drawFrontMeshFilter;         // ”w–Ê‚ğ•`‰æ‚·‚éƒQ[ƒ€ƒIƒuƒWƒFƒNƒg‚ÌƒŠƒXƒgB
+        CommandBuffer m_commandBuffer;                  // ã‚³ãƒãƒ³ãƒ‰ãƒãƒƒãƒ•ã‚¡ã€‚
+        Camera m_camera;                                // ã‚«ãƒ¡ãƒ©ã€‚
+        VolumeSpotLight[] m_volumeSpotLights;           // ãƒœãƒªãƒ¥ãƒ¼ãƒ ã‚¹ãƒãƒƒãƒˆãƒ©ã‚¤ãƒˆã€‚
+        RenderTexture m_volumeMapBack;                  // èƒŒé¢ã®æ·±åº¦å€¤ãŒæ›¸ãè¾¼ã¾ã‚Œã¦ã„ã‚‹ãƒœãƒªãƒ¥ãƒ¼ãƒ ãƒãƒƒãƒ—ã€‚
+        RenderTexture m_volumeMapFront;                 // è¡¨é¢ã®æ·±åº¦å€¤ãŒæ›¸ãè¾¼ã¾ã‚Œã¦ã„ã‚‹ãƒœãƒªãƒ¥ãƒ¼ãƒ ãƒãƒƒãƒ—ã€‚
+        int m_volumeMapWidth;                           // ãƒœãƒªãƒ¥ãƒ¼ãƒ ãƒãƒƒãƒ—ã®å¹…ã€‚
+        int m_volumeMapHeight;                          // ãƒœãƒªãƒ¥ãƒ¼ãƒ ãƒãƒƒãƒ—ã®é«˜ã•ã€‚
+        List<Material> m_drawBackMaterialList;          // èƒŒé¢ã®æ·±åº¦å€¤æç”»ã§ä½¿ç”¨ã™ã‚‹ãƒãƒ†ãƒªã‚¢ãƒ«ã®ãƒªã‚¹ãƒˆã€‚
+        List<Material> m_drawFrontMaterialList;         // è¡¨é¢ã®æ·±åº¦å€¤æç”»ã§ä½¿ç”¨ã™ã‚‹ãƒãƒ†ãƒªã‚¢ãƒ«ã®ãƒªã‚¹ãƒˆã€‚
+        List<MeshFilter> m_drawBackMeshFilterList;      // èƒŒé¢ã®æ·±åº¦å€¤æç”»ã§ä½¿ç”¨ã™ã‚‹ãƒ¡ãƒƒã‚·ãƒ¥ãƒ•ã‚£ãƒ«ã‚¿ãƒ¼ã®ãƒªã‚¹ãƒˆã€‚
+        List<MeshFilter> m_drawFrontMeshFilterList;     // è¡¨é¢ã®æ·±åº¦å€¤æç”»ã§ä½¿ç”¨ã™ã‚‹ãƒ¡ãƒƒã‚·ãƒ¥ãƒ•ã‚£ãƒ«ã‚¿ãƒ¼ã®ãƒªã‚¹ãƒˆã€‚
         List<RenderVolumeSpotLightFinal> m_drawFinals;
+
         // Start is called before the first frame update
         void Start()
         {
             m_camera = GetComponent<Camera>();
             m_commandBuffer = new CommandBuffer();
             m_volumeSpotLights = Object.FindObjectsOfType<VolumeSpotLight>();
-            m_drawBackGameObjects = new List<MeshRenderer>();
-            m_drawFrontGameObjects = new List<MeshRenderer>();
-            m_drawBackMeshFilter = new List<MeshFilter>();
-            m_drawFrontMeshFilter = new List<MeshFilter>();
+            m_drawBackMaterialList = new List<Material>();
+            m_drawFrontMaterialList = new List<Material>();
+            m_drawBackMeshFilterList = new List<MeshFilter>();
+            m_drawFrontMeshFilterList = new List<MeshFilter>();
             m_drawFinals = new List<RenderVolumeSpotLightFinal>();
             foreach ( var volumeSpotLight in m_volumeSpotLights)
             {
-                var trans = volumeSpotLight.transform.Find("VolumeSpotLightBackRenderer");
+                var trans = volumeSpotLight.transform.Find("BackRenderer");
                 var meshRenderer = trans.GetComponent<MeshRenderer>();
                 meshRenderer.enabled = false;
-                m_drawBackGameObjects.Add(meshRenderer);
-                m_drawBackMeshFilter.Add(trans.GetComponent<MeshFilter>());
-                trans = volumeSpotLight.transform.Find("VolumeSpotLightFrontRenderer");
+                m_drawBackMaterialList.Add(meshRenderer.material);
+                m_drawBackMeshFilterList.Add(trans.GetComponent<MeshFilter>());
 
+                trans = volumeSpotLight.transform.Find("FrontRenderer");
                 meshRenderer = trans.GetComponent<MeshRenderer>();
                 meshRenderer.enabled = false;
-                m_drawFrontGameObjects.Add(meshRenderer);
+                m_drawFrontMaterialList.Add(meshRenderer.material);
+                m_drawFrontMeshFilterList.Add(trans.GetComponent<MeshFilter>());
 
-                m_drawFrontMeshFilter.Add(trans.GetComponent<MeshFilter>());
-                trans = volumeSpotLight.transform.Find("VolumeSpotLightFinalRenderer");
+                trans = volumeSpotLight.transform.Find("FinalRenderer");
                 m_drawFinals.Add(trans.GetComponent<RenderVolumeSpotLightFinal>());
             }
-            // ƒ{ƒŠƒ…[ƒ€ƒ}ƒbƒv‚ğ¶¬
-            m_width = Screen.width;
-            m_height = Screen.height;
-            m_volumeMapBack = new RenderTexture(m_width, m_height, 32, RenderTextureFormat.RGFloat);
+            // ãƒœãƒªãƒ¥ãƒ¼ãƒ ãƒãƒƒãƒ—ã‚’ç”Ÿæˆ
+            m_volumeMapWidth = Screen.width;
+            m_volumeMapHeight = Screen.height;
+            m_volumeMapBack = new RenderTexture(m_volumeMapWidth, m_volumeMapHeight, 32, RenderTextureFormat.RGFloat);
             m_volumeMapFront = new RenderTexture(m_volumeMapBack);
         }
         // Update is called once per frame
         void OnPreRender()
         {
-            if (m_width != Screen.width || m_height != Screen.height)
+            if (m_volumeMapWidth != Screen.width || m_volumeMapHeight != Screen.height)
             {
-                // ‰æ–Ê‰ğ‘œ“x‚ª•Ï‚í‚Á‚½‚Ì‚Åì‚è’¼‚µB
-                m_width = Screen.width;
-                m_height = Screen.height;
-                m_volumeMapBack = new RenderTexture(m_width, m_height, 32, RenderTextureFormat.RFloat);
+                // ç”»é¢è§£åƒåº¦ãŒå¤‰ã‚ã£ãŸã®ã§ä½œã‚Šç›´ã—ã€‚
+                m_volumeMapWidth = Screen.width;
+                m_volumeMapHeight = Screen.height;
+                m_volumeMapBack = new RenderTexture(m_volumeMapWidth, m_volumeMapHeight, 32, RenderTextureFormat.RFloat);
                 m_volumeMapFront = new RenderTexture(m_volumeMapBack);
             }
             
-            for ( int meshNo = 0; meshNo < m_drawBackGameObjects.Count; meshNo++)
+            for ( int litNo = 0; litNo < m_drawBackMaterialList.Count; litNo++)
             {
                 Matrix4x4 mWorld = Matrix4x4.TRS(
-                    m_drawBackMeshFilter[meshNo].transform.position,
-                    m_drawBackMeshFilter[meshNo].transform.rotation,
-                    m_drawBackMeshFilter[meshNo].transform.lossyScale
+                    m_drawBackMeshFilterList[litNo].transform.position,
+                    m_drawBackMeshFilterList[litNo].transform.rotation,
+                    m_drawBackMeshFilterList[litNo].transform.lossyScale
                 );
-                // ”w–Ê‚ğ•`‰æB
+                // èƒŒé¢ã‚’æç”»ã€‚
                 m_commandBuffer.SetRenderTarget(m_volumeMapBack);
                 m_commandBuffer.ClearRenderTarget(true, true, Color.black);
                 m_commandBuffer.DrawMesh(
-                    m_drawBackMeshFilter[meshNo].mesh,
+                    m_drawBackMeshFilterList[litNo].mesh,
                     mWorld,
-                    m_drawBackGameObjects[meshNo].material
+                    m_drawBackMaterialList[litNo]
                 );
 
-                // •\–Ê‚ğ•`‰æB
+                // è¡¨é¢ã‚’æç”»ã€‚
                 m_commandBuffer.SetRenderTarget(m_volumeMapFront);
                 m_commandBuffer.ClearRenderTarget(true, true, Color.black);
                 m_commandBuffer.DrawMesh(
-                    m_drawFrontMeshFilter[meshNo].mesh,
+                    m_drawFrontMeshFilterList[litNo].mesh,
                     mWorld,
-                    m_drawFrontGameObjects[meshNo].material
+                    m_drawFrontMaterialList[litNo]
                 );
                 m_commandBuffer.SetRenderTarget(BuiltinRenderTextureType.CameraTarget);
 
-                m_drawFinals[meshNo].Draw(
+                m_drawFinals[litNo].Draw(
                     m_camera,
                     m_volumeMapFront,
                     m_volumeMapBack,
                     m_commandBuffer,
-                    m_volumeSpotLights[meshNo].volumeSpotLightData
+                    m_volumeSpotLights[litNo].volumeSpotLightData
                 );
 
             }
-            m_camera.AddCommandBuffer(CameraEvent.AfterSkybox, m_commandBuffer);
+            m_camera.AddCommandBuffer(CameraEvent.BeforeForwardAlpha, m_commandBuffer);
         }
         private void OnPostRender()
         {
-            m_camera.RemoveCommandBuffer(CameraEvent.AfterSkybox, m_commandBuffer);
+            m_camera.RemoveCommandBuffer(CameraEvent.BeforeForwardAlpha, m_commandBuffer);
             m_commandBuffer.Clear();
         }
     }

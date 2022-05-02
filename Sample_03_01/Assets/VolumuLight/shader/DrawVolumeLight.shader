@@ -7,7 +7,7 @@ Shader "VolumeLight/DrawVolume"
 
         Pass
         {
-            Blend OneMinusDstColor One
+            Blend One One
             Cull Off
             ZWrite Off
             ZTest Always
